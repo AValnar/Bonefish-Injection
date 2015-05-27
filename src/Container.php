@@ -27,7 +27,9 @@ use Bonefish\Injection\Exceptions\RuntimeException;
 use Bonefish\Reflection\ClassNameResolver;
 use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
 use Bonefish\Reflection\Meta\ClassMeta;
+use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\ReflectionService;
+use Doctrine\Common\Cache\Cache;
 
 class Container implements ContainerInterface
 {
@@ -57,10 +59,45 @@ class Container implements ContainerInterface
      */
     protected $hasFactory = array();
 
-    public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver)
+    /**
+     * @var Cache
+     */
+    protected $cache = null;
+
+    const CACHE_PREFIX = 'bonefish.container.injections.';
+
+    public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache = null)
     {
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
+        $this->cache = $cache;
+    }
+
+    /**
+     * @return Cache
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
+
+    /**
+     * @param Cache $cache
+     * @return self
+     */
+    public function setCache($cache)
+    {
+        $this->cache = $cache;
+        return $this;
+    }
+
+    /**
+     * @param string $className
+     * @return string
+     */
+    protected function getCacheKey($className)
+    {
+        return self::CACHE_PREFIX . str_replace('\\', '.', $className);
     }
 
     /**
@@ -186,6 +223,39 @@ class Container implements ContainerInterface
             $classMeta = $this->reflectionService->getClassMetaReflection(get_class($object));
         }
 
+        $properties = null;
+
+        if ($this->cache !== null) {
+            $cacheKey = $this->getCacheKey($classMeta->getName());
+            $hit = $this->cache->fetch($cacheKey);
+
+            if ($hit !== false) {
+                $properties = $hit;
+            }
+        }
+
+        if ($properties === null) {
+            $properties = $this->getPropertyInjectionProperties($classMeta);
+            if ($this->cache !== null) {
+                $this->cache->save($cacheKey, $properties);
+            }
+        }
+
+        foreach($properties as $propertyInjection)
+        {
+            $this->propertyInjection($propertyInjection['className'], $propertyInjection['parameters'], $object, $propertyInjection['property']);
+        }
+    }
+
+    /**
+     * @param ClassMeta $classMeta
+     * @throws RuntimeException
+     * @return array
+     */
+    protected function getPropertyInjectionProperties(ClassMeta $classMeta)
+    {
+        $properties = array();
+
         foreach ($classMeta->getProperties() as $property) {
             if ($property->isPublic()) {
                 foreach (self::INJECT_ANNOTATIONS as $injectAnnotation) {
@@ -206,14 +276,26 @@ class Container implements ContainerInterface
                             $parameters = array($annotation->getParameter()->getDefaultValue());
                         }
 
-                        $dependency = $this->getServiceOrProxy($className, $property->getName(), $object, $parameters);
-                        $object->{$property->getName()} = $dependency;
-
+                        $properties[] = array('className' => $className, 'parameters' => $parameters, 'property' => $property);
                         break;
                     }
                 }
             }
         }
+
+        return $properties;
+    }
+
+    /**
+     * @param string $className
+     * @param array $parameters
+     * @param object $object
+     * @param PropertyMeta $property
+     */
+    protected function propertyInjection($className, $parameters, $object, $property)
+    {
+        $dependency = $this->getServiceOrProxy($className, $property->getName(), $object, $parameters);
+        $object->{$property->getName()} = $dependency;
     }
 
     /**
