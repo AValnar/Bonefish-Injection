@@ -21,6 +21,7 @@
 
 namespace Bonefish\Injection;
 
+use Bonefish\Injection\Exceptions\InvalidArgumentException;
 use Bonefish\Injection\Exceptions\RuntimeException;
 use Bonefish\Reflection\Meta\ClassMeta;
 
@@ -49,7 +50,7 @@ interface ContainerInterface
      * find an registered implementation. If no implementation was found a RuntimeException is thrown.
      *
      * After the implementation has been resolved and before the object is created the container will check if a factory
-     * for this class exists. This Factory has to implement the interface \Bonefish\Factory\IFactory.
+     * for this class exists. This Factory has to implement the interface \Bonefish\Factory\FactoryInterface.
      * The name is resolved as follows \Full\Name\Space\Class => \Full\Name\Space\FACTORY_NAMESPACE\ClassFACTORY_SUFFIX
      * E.g. \Bonefish\Core\Environment => \Bonefish\Core\Factory\EnvironmentFactory
      * When a factory exists get() will be called to retrieve an instance and will be used to create an instance.
@@ -90,4 +91,12 @@ interface ContainerInterface
      * @param ClassMeta $classMeta
      */
     public function performInjections($object, ClassMeta $classMeta = null);
+
+    /**
+     * Add an already created service to the container.
+     *
+     * @param $object
+     * @throws InvalidArgumentException
+     */
+    public function add($object);
 }

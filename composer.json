@@ -5,7 +5,7 @@
     "prefer-stable": true,
     "require": {
         "av/bonefish-reflections": "dev-master",
-        "doctrine/cache": "1.4.*"
+        "av/bonefish-traits": "dev-master"
     },
     "autoload": {
         "psr-4": {

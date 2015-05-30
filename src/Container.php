@@ -22,17 +22,19 @@
 namespace Bonefish\Injection;
 
 
-use Bonefish\Factory\IFactory;
+use Bonefish\Injection\Exceptions\InvalidArgumentException;
 use Bonefish\Injection\Exceptions\RuntimeException;
 use Bonefish\Reflection\ClassNameResolver;
 use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
 use Bonefish\Reflection\Meta\ClassMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\ReflectionService;
+use Bonefish\Traits\DoctrineCacheTrait;
 use Doctrine\Common\Cache\Cache;
 
 class Container implements ContainerInterface
 {
+    use DoctrineCacheTrait;
 
     /**
      * @var ReflectionService
@@ -60,44 +62,16 @@ class Container implements ContainerInterface
     protected $hasFactory = array();
 
     /**
-     * @var Cache
+     * @var string
      */
-    protected $cache = null;
+    protected $cachePrefix = 'bonefish.container.injections';
 
-    const CACHE_PREFIX = 'bonefish.container.injections.';
 
     public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache = null)
     {
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
         $this->cache = $cache;
-    }
-
-    /**
-     * @return Cache
-     */
-    public function getCache()
-    {
-        return $this->cache;
-    }
-
-    /**
-     * @param Cache $cache
-     * @return self
-     */
-    public function setCache($cache)
-    {
-        $this->cache = $cache;
-        return $this;
-    }
-
-    /**
-     * @param string $className
-     * @return string
-     */
-    protected function getCacheKey($className)
-    {
-        return self::CACHE_PREFIX . str_replace('\\', '.', $className);
     }
 
     /**
@@ -132,7 +106,7 @@ class Container implements ContainerInterface
      * find an registered implementation. If no implementation was found a RuntimeException is thrown.
      *
      * After the implementation has been resolved and before the object is created the container will check if a factory
-     * for this class exists. This Factory has to implement the interface \Bonefish\Factory\IFactory.
+     * for this class exists. This Factory has to implement the interface \Bonefish\Factory\FactoryInterface.
      * The name is resolved as follows \Full\Name\Space\Class => \Full\Name\Space\FACTORY_NAMESPACE\ClassFACTORY_SUFFIX
      * E.g. \Bonefish\Core\Environment => \Bonefish\Core\Factory\EnvironmentFactory
      * When a factory exists get() will be called to retrieve an instance and will be used to create an instance.
@@ -338,7 +312,7 @@ class Container implements ContainerInterface
      * Return factory object or false if none exists
      *
      * @param string $className
-     * @return IFactory|bool
+     * @return FactoryInterface|bool
      */
     protected function getFactory($className)
     {
@@ -349,7 +323,6 @@ class Container implements ContainerInterface
                 $this->hasFactory[$className] = $factoryClassName;
             } else {
                 $this->hasFactory[$className] = false;
-
                 return false;
             }
         }
@@ -411,4 +384,31 @@ class Container implements ContainerInterface
 
         return new Proxy($className, $property, $parent, $this, $parameters);
     }
+
+    /**
+     * Add an already created service to the container.
+     *
+     * @param $object
+     * @throws InvalidArgumentException
+     */
+    public function add($object)
+    {
+        $className = get_class($object);
+
+        if ($className === Container::class) {
+            throw new InvalidArgumentException('Tried to add a container instance');
+        }
+
+        $className = $this->classNameResolver->resolveClassName($className);
+
+        $parameterKey = $this->getParameterStoreKey(array());
+
+        if (isset($this->services[$className][$parameterKey])) {
+            throw new InvalidArgumentException('Tried to add a service instance which already exists');
+        }
+
+        $this->services[$className][$parameterKey] = $object;
+    }
+
+
 }
