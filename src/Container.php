@@ -349,9 +349,7 @@ class Container implements ContainerInterface
             if (empty($parameters)) {
                 $object = new $className();
             } else {
-                // can't avoid a real reflection here
-                $reflection = $this->reflectionService->getClassReflection($className);
-                $object = $reflection->newInstanceArgs($parameters);
+                $object = new $className(...$parameters);
             }
         }
 
