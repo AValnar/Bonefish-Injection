@@ -61,17 +61,14 @@ class Container implements ContainerInterface
      */
     protected $hasFactory = array();
 
-    /**
-     * @var string
-     */
-    protected $cachePrefix = 'bonefish.container.injections';
-
+    protected $injectAnnotations = array('inject', 'Bonefish\Inject');
 
     public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache = null)
     {
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
         $this->cache = $cache;
+        $this->setCachePrefix('bonefish.container.injections');
     }
 
     /**
@@ -232,7 +229,7 @@ class Container implements ContainerInterface
 
         foreach ($classMeta->getProperties() as $property) {
             if ($property->isPublic()) {
-                foreach (self::INJECT_ANNOTATIONS as $injectAnnotation) {
+                foreach ($this->injectAnnotations as $injectAnnotation) {
                     $annotation = $property->getAnnotation($injectAnnotation);
 
                     if ($annotation !== false) {

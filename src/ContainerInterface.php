@@ -27,8 +27,6 @@ use Bonefish\Reflection\Meta\ClassMeta;
 
 interface ContainerInterface
 {
-    const INJECT_ANNOTATIONS = array('inject', 'Bonefish\Inject');
-
     const FACTORY_NAMESPACE = 'Factory';
 
     const FACTORY_SUFFIX = 'Factory';
