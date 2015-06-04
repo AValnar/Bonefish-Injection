@@ -39,7 +39,7 @@ interface ContainerInterface
      * @param array $parameters
      * @return object
      */
-    public function get($className, array $parameters = array());
+    public function get($className, array $parameters = []);
 
     /**
      * Create a class with supplied parameters.
@@ -62,7 +62,7 @@ interface ContainerInterface
      * @return object
      * @throws RuntimeException
      */
-    public function create($className, array $parameters = array());
+    public function create($className, array $parameters = []);
 
     /**
      * Set a class to be used for a specific interface

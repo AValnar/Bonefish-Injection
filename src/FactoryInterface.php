@@ -30,5 +30,5 @@ interface FactoryInterface
      * @param array $parameters
      * @return mixed
      */
-    public function create(array $parameters = array());
+    public function create(array $parameters = []);
 }

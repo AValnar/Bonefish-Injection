@@ -27,7 +27,7 @@ class Proxy
     /**
      * @var array
      */
-    protected $parameters = array();
+    protected $parameters = [];
 
     /**
      * @var string
@@ -56,7 +56,7 @@ class Proxy
      * @param array $parameters
      * @param ContainerInterface $container
      */
-    public function __construct($className, $property, $parent, $container, array $parameters = array())
+    public function __construct($className, $property, $parent, $container, array $parameters = [])
     {
         $this->className = $className;
         $this->property = $property;
@@ -70,18 +70,18 @@ class Proxy
      * @param array $arguments
      * @return mixed
      */
-    public function __call($name, $arguments = array())
+    public function __call($name, $arguments = [])
     {
         $dependency = $this->container->get($this->className, $this->parameters);
         $this->parent->{$this->property} = $dependency;
 
-        return call_user_func_array(array($this->parent->{$this->property}, $name), $arguments);
+        return call_user_func_array([$this->parent->{$this->property}, $name], $arguments);
     }
 
 
     public function __sleep()
     {
         // Break the proxy, because objects with proxies in them should most likely not be serialised anyway
-        return array('className');
+        return ['className'];
     }
 }

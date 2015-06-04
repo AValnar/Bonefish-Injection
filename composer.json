@@ -4,6 +4,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": ">=5.6.0",
         "av/bonefish-reflections": "dev-master",
         "av/bonefish-traits": "dev-master"
     },

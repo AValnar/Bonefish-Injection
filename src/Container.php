@@ -49,19 +49,19 @@ class Container implements ContainerInterface
     /**
      * @var array
      */
-    protected $services = array();
+    protected $services = [];
 
     /**
      * @var array
      */
-    protected $implementations = array();
+    protected $implementations = [];
 
     /**
      * @var array
      */
-    protected $hasFactory = array();
+    protected $hasFactory = [];
 
-    protected $injectAnnotations = array('inject', 'Bonefish\Inject');
+    protected $injectAnnotations = ['inject', 'Bonefish\Inject'];
 
     public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache = null)
     {
@@ -79,7 +79,7 @@ class Container implements ContainerInterface
      * @param array $parameters
      * @return object
      */
-    public function get($className, array $parameters = array())
+    public function get($className, array $parameters = [])
     {
         if ($this->injectSelf($className)) {
             return $this;
@@ -117,7 +117,7 @@ class Container implements ContainerInterface
      * @return object
      * @throws RuntimeException
      */
-    public function create($className, array $parameters = array())
+    public function create($className, array $parameters = [])
     {
         if ($this->injectSelf($className)) {
             return $this;
@@ -225,7 +225,7 @@ class Container implements ContainerInterface
      */
     protected function getPropertyInjectionProperties(ClassMeta $classMeta)
     {
-        $properties = array();
+        $properties = [];
 
         foreach ($classMeta->getProperties() as $property) {
             if ($property->isPublic()) {
@@ -241,13 +241,17 @@ class Container implements ContainerInterface
 
                         $className = $varAnnotation->getClassName();
 
-                        $parameters = array();
+                        $parameters = [];
 
                         if ($annotation->getParameter()->hasDefaultValue()) {
-                            $parameters = array($annotation->getParameter()->getDefaultValue());
+                            $parameters = [$annotation->getParameter()->getDefaultValue()];
                         }
 
-                        $properties[] = array('className' => $className, 'parameters' => $parameters, 'property' => $property);
+                        $properties[] = [
+                            'className' => $className,
+                            'parameters' => $parameters,
+                            'property' => $property
+                        ];
                         break;
                     }
                 }
@@ -396,7 +400,7 @@ class Container implements ContainerInterface
 
         $className = $this->classNameResolver->resolveClassName($className);
 
-        $parameterKey = $this->getParameterStoreKey(array());
+        $parameterKey = $this->getParameterStoreKey([]);
 
         if (isset($this->services[$className][$parameterKey])) {
             throw new InvalidArgumentException('Tried to add a service instance which already exists');

@@ -37,7 +37,7 @@ class ContainerFactory implements FactoryInterface
      * @param array $parameters
      * @return mixed
      */
-    public function create(array $parameters = array())
+    public function create(array $parameters = [])
     {
         if (isset($parameters['cache']) && $parameters['cache'] instanceof Cache) {
             $cache = $parameters['cache'];
