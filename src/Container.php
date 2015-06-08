@@ -24,7 +24,6 @@ namespace Bonefish\Injection;
 
 use Bonefish\Injection\Exceptions\InvalidArgumentException;
 use Bonefish\Injection\Exceptions\RuntimeException;
-use Bonefish\Raptor\Raptor;
 use Bonefish\Reflection\ClassNameResolver;
 use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
 use Bonefish\Reflection\Meta\ClassMeta;
