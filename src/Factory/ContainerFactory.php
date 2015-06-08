@@ -29,7 +29,7 @@ use Bonefish\Reflection\ReflectionService;
 use Doctrine\Common\Cache\ApcCache;
 use Doctrine\Common\Cache\Cache;
 
-class ContainerFactory implements FactoryInterface
+final class ContainerFactory implements FactoryInterface
 {
     /**
      * Return an object with fully injected dependencies
