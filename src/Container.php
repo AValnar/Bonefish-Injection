@@ -29,12 +29,12 @@ use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
 use Bonefish\Reflection\Meta\ClassMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\ReflectionService;
-use Bonefish\Traits\DoctrineCacheTrait;
+use Bonefish\Traits\CacheHelperTrait;
 use Doctrine\Common\Cache\Cache;
 
 final class Container implements ContainerInterface
 {
-    use DoctrineCacheTrait;
+    use CacheHelperTrait;
 
     /**
      * @var ReflectionService
@@ -45,6 +45,11 @@ final class Container implements ContainerInterface
      * @var ClassNameResolver
      */
     protected $classNameResolver;
+
+    /**
+     * @var Cache
+     */
+    protected $cache;
 
     /**
      * @var array
