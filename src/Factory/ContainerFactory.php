@@ -25,7 +25,11 @@ use Bonefish\Injection\Container;
 use Bonefish\Injection\ContainerInterface;
 use Bonefish\Injection\FactoryInterface;
 use Bonefish\Reflection\ClassNameResolver;
+use Bonefish\Reflection\Factory\ReflectionServiceFactory;
 use Bonefish\Reflection\ReflectionService;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\IndexedReader;
 use Doctrine\Common\Cache\ApcCache;
 use Doctrine\Common\Cache\Cache;
 
@@ -45,7 +49,8 @@ final class ContainerFactory implements FactoryInterface
             $cache = new ApcCache();
         }
 
-        $reflectionService = new ReflectionService($cache);
+        $reflectionServiceFactory = new ReflectionServiceFactory();
+        $reflectionService = $reflectionServiceFactory->create($parameters);
         $classNameRevolver = new ClassNameResolver();
 
         $container = new Container($reflectionService, $classNameRevolver, $cache);

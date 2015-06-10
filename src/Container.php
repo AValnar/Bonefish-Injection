@@ -22,10 +22,11 @@
 namespace Bonefish\Injection;
 
 
+use Bonefish\Injection\Annotations\Inject;
 use Bonefish\Injection\Exceptions\InvalidArgumentException;
 use Bonefish\Injection\Exceptions\RuntimeException;
 use Bonefish\Reflection\ClassNameResolver;
-use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
+use Bonefish\Reflection\Annotations\Variable;
 use Bonefish\Reflection\Meta\ClassMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\ReflectionService;
@@ -66,9 +67,7 @@ final class Container implements ContainerInterface
      */
     protected $hasFactory = [];
 
-    protected $injectAnnotations = ['inject', 'Bonefish\Inject'];
-
-    public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache = null)
+    public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache)
     {
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
@@ -201,20 +200,16 @@ final class Container implements ContainerInterface
 
         $properties = null;
 
-        if ($this->cache !== null) {
-            $cacheKey = $this->getCacheKey($classMeta->getName());
-            $hit = $this->cache->fetch($cacheKey);
+        $cacheKey = $this->getCacheKey($classMeta->getName());
+        $hit = $this->cache->fetch($cacheKey);
 
-            if ($hit !== false) {
-                $properties = $hit;
-            }
+        if ($hit !== false) {
+            $properties = $hit;
         }
 
         if ($properties === null) {
             $properties = $this->getPropertyInjectionProperties($classMeta);
-            if ($this->cache !== null) {
-                $this->cache->save($cacheKey, $properties);
-            }
+            $this->cache->save($cacheKey, $properties);
         }
 
         foreach($properties as $propertyInjection)
@@ -234,31 +229,30 @@ final class Container implements ContainerInterface
 
         foreach ($classMeta->getProperties() as $property) {
             if ($property->isPublic()) {
-                foreach ($this->injectAnnotations as $injectAnnotation) {
-                    $annotation = $property->getAnnotation($injectAnnotation);
+                /** @var Inject $annotation */
+                $annotation = $property->getAnnotation(Inject::class);
 
-                    if ($annotation !== false) {
-                        /** @var VarAnnotationMeta $varAnnotation */
-                        $varAnnotation = $property->getAnnotation('var');
-                        if ($varAnnotation === false) {
-                            throw new RuntimeException('Tried to inject without var annotation.');
-                        }
-
-                        $className = $varAnnotation->getClassName();
-
-                        $parameters = [];
-
-                        if ($annotation->getParameter()->hasDefaultValue()) {
-                            $parameters = [$annotation->getParameter()->getDefaultValue()];
-                        }
-
-                        $properties[] = [
-                            'className' => $className,
-                            'parameters' => $parameters,
-                            'property' => $property
-                        ];
-                        break;
+                if ($annotation !== false) {
+                    /** @var Variable $varAnnotation */
+                    $varAnnotation = $property->getAnnotation(Variable::class);
+                    if ($varAnnotation === false) {
+                        throw new RuntimeException('Tried to inject without var annotation.');
                     }
+
+                    $className = $varAnnotation->getType();
+
+                    $parameters = [];
+
+                    if (!empty($annotation->getParameters())) {
+                        $parameters = [$annotation->getParameters()];
+                    }
+
+                    $properties[] = [
+                        'className' => $className,
+                        'parameters' => $parameters,
+                        'property' => $property
+                    ];
+                    break;
                 }
             }
         }
