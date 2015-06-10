@@ -138,7 +138,7 @@ final class Container implements ContainerInterface
             throw new RuntimeException('Tried to create an interface ( ' . $className . ' ) without registered implementation.');
         }
 
-        $object = $this->createObject($className, $parameters);
+        $object = $this->createObject($className, $parameters, $classMeta);
 
         $this->performInjections($object, $classMeta);
 
@@ -344,9 +344,10 @@ final class Container implements ContainerInterface
     /**
      * @param string $className
      * @param array $parameters
+     * @param ClassMeta $classMeta
      * @return object
      */
-    protected function createObject($className, array $parameters)
+    protected function createObject($className, array $parameters, ClassMeta $classMeta)
     {
         $factory = $this->getFactory($className);
 
@@ -354,13 +355,41 @@ final class Container implements ContainerInterface
             $object = $factory->create($parameters);
         } else {
             if (empty($parameters)) {
-                $object = new $className();
+
+                $constructorMethod = $classMeta->getMethod('__construct');
+
+                if ($constructorMethod === false || $constructorMethod->getAnnotation(Inject::class) === false) {
+                    $object = new $className();
+                } else {
+                    $constructorInjections = $this->getConstructorInjections($classMeta);
+                    $object = new $className(...$constructorInjections);
+                }
             } else {
                 $object = new $className(...$parameters);
             }
         }
 
         return $object;
+    }
+
+    /**
+     * @param ClassMeta $classMeta
+     * @return array
+     */
+    protected function getConstructorInjections(ClassMeta $classMeta)
+    {
+        $dependencies = [];
+        $parameters = $classMeta->getMethod('__construct')->getParameters();
+
+        foreach ($parameters as $parameter)
+        {
+            $type = $parameter->getType();
+            if ($type === 'array' || $type === 'mixed') continue;
+
+            $dependencies[] = $this->get($type);
+        }
+
+        return $dependencies;
     }
 
     /**
