@@ -67,8 +67,11 @@ final class Container implements ContainerInterface
      */
     protected $hasFactory = [];
 
-    public function __construct(ReflectionService $reflectionService, ClassNameResolver $classNameResolver, Cache $cache)
-    {
+    public function __construct(
+        ReflectionService $reflectionService,
+        ClassNameResolver $classNameResolver,
+        Cache $cache
+    ) {
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
         $this->cache = $cache;
@@ -212,9 +215,9 @@ final class Container implements ContainerInterface
             $this->cache->save($cacheKey, $properties);
         }
 
-        foreach($properties as $propertyInjection)
-        {
-            $this->propertyInjection($propertyInjection['className'], $propertyInjection['parameters'], $object, $propertyInjection['property']);
+        foreach ($properties as $propertyInjection) {
+            $this->propertyInjection($propertyInjection['className'], $propertyInjection['parameters'], $object,
+                $propertyInjection['property']);
         }
     }
 
@@ -228,33 +231,36 @@ final class Container implements ContainerInterface
         $properties = [];
 
         foreach ($classMeta->getProperties() as $property) {
-            if ($property->isPublic()) {
-                /** @var Inject $annotation */
-                $annotation = $property->getAnnotation(Inject::class);
 
-                if ($annotation !== false) {
-                    /** @var Variable $varAnnotation */
-                    $varAnnotation = $property->getAnnotation(Variable::class);
-                    if ($varAnnotation === false) {
-                        throw new RuntimeException('Tried to inject without var annotation.');
-                    }
-
-                    $className = $varAnnotation->getType();
-
-                    $parameters = [];
-
-                    if (!empty($annotation->getParameters())) {
-                        $parameters = [$annotation->getParameters()];
-                    }
-
-                    $properties[] = [
-                        'className' => $className,
-                        'parameters' => $parameters,
-                        'property' => $property
-                    ];
-                    break;
-                }
+            if (!$property->isPublic()) {
+                continue;
             }
+            /** @var Inject $annotation */
+            $annotation = $property->getAnnotation(Inject::class);
+
+            if ($annotation === false) {
+                continue;
+            }
+            /** @var Variable $varAnnotation */
+            $varAnnotation = $property->getAnnotation(Variable::class);
+            if ($varAnnotation === false) {
+                throw new RuntimeException('Tried to inject without var annotation.');
+            }
+
+            $className = $varAnnotation->getType();
+
+            $parameters = [];
+
+            if (!empty($annotation->getParameters())) {
+                $parameters = [$annotation->getParameters()];
+            }
+
+            $properties[] = [
+                'className' => $className,
+                'parameters' => $parameters,
+                'property' => $property
+            ];
+
         }
 
         return $properties;
@@ -323,6 +329,7 @@ final class Container implements ContainerInterface
                 $this->hasFactory[$className] = $factoryClassName;
             } else {
                 $this->hasFactory[$className] = false;
+
                 return false;
             }
         }

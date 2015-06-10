@@ -39,7 +39,7 @@ final class ContainerFactory implements FactoryInterface
      * Return an object with fully injected dependencies
      *
      * @param array $parameters
-     * @return mixed
+     * @return Container
      */
     public function create(array $parameters = [])
     {
