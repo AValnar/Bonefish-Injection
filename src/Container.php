@@ -329,7 +329,6 @@ final class Container implements ContainerInterface
                 $this->hasFactory[$className] = $factoryClassName;
             } else {
                 $this->hasFactory[$className] = false;
-
                 return false;
             }
         }
@@ -352,24 +351,21 @@ final class Container implements ContainerInterface
         $factory = $this->getFactory($className);
 
         if ($factory !== false) {
-            $object = $factory->create($parameters);
-        } else {
-            if (empty($parameters)) {
-
-                $constructorMethod = $classMeta->getMethod('__construct');
-
-                if ($constructorMethod === false || $constructorMethod->getAnnotation(Inject::class) === false) {
-                    $object = new $className();
-                } else {
-                    $constructorInjections = $this->getConstructorInjections($classMeta);
-                    $object = new $className(...$constructorInjections);
-                }
-            } else {
-                $object = new $className(...$parameters);
-            }
+            return $factory->create($parameters);
         }
 
-        return $object;
+        if (!empty($parameters)) {
+            return new $className(...$parameters);
+        }
+
+        $constructorMethod = $classMeta->getMethod('__construct');
+
+        if ($constructorMethod === false || $constructorMethod->getAnnotation(Inject::class) === false) {
+            return new $className();
+        }
+
+        $constructorInjections = $this->getConstructorInjections($classMeta);
+        return new $className(...$constructorInjections);
     }
 
     /**
