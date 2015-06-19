@@ -72,10 +72,21 @@ final class Container implements ContainerInterface
         ClassNameResolver $classNameResolver,
         Cache $cache
     ) {
+        // set deps
         $this->reflectionService = $reflectionService;
         $this->classNameResolver = $classNameResolver;
         $this->cache = $cache;
+
+        // set cache prefix
         $this->setCachePrefix('bonefish.container.injections');
+
+        // add deps as services
+        $this->add($reflectionService);
+        $this->add($classNameResolver);
+        $this->add($cache);
+
+        // add self as interface implementation
+        $this->setInterfaceImplementation(self::class, ContainerInterface::class);
     }
 
     /**

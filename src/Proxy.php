@@ -22,32 +22,32 @@
 namespace Bonefish\Injection;
 
 
-class Proxy
+final class Proxy
 {
     /**
      * @var array
      */
-    protected $parameters = [];
+    private $parameters = [];
 
     /**
      * @var string
      */
-    protected $className;
+    private $className;
 
     /**
      * @var string
      */
-    protected $property;
+    private $property;
 
     /**
      * @var object
      */
-    protected $parent;
+    private $parent;
 
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    private $container;
 
     /**
      * @param string $className
@@ -56,7 +56,7 @@ class Proxy
      * @param array $parameters
      * @param ContainerInterface $container
      */
-    public function __construct($className, $property, $parent, $container, array $parameters = [])
+    public function __construct($className, $property, $parent, ContainerInterface $container, array $parameters = [])
     {
         $this->className = $className;
         $this->property = $property;
@@ -70,7 +70,7 @@ class Proxy
      * @param array $arguments
      * @return mixed
      */
-    public function __call($name, $arguments = [])
+    public function __call($name, array $arguments = [])
     {
         $dependency = $this->container->get($this->className, $this->parameters);
         $this->parent->{$this->property} = $dependency;
