@@ -22,6 +22,8 @@
 namespace Bonefish\Injection;
 
 
+use Bonefish\Injection\Container\ContainerInterface;
+
 final class Proxy
 {
     /**
