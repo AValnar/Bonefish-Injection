@@ -26,23 +26,16 @@ final class InterfaceResolver implements ResolverInterface
 {
 
     /**
-     * @var string
+     * @var array
      */
-    private $implementation;
+    private $implementations = [];
 
     /**
-     * @var string
+     * @param array $implementations
      */
-    private $interface;
-
-    /**
-     * @param string $implementation
-     * @param string $interface
-     */
-    public function __construct($implementation, $interface)
+    public function __construct($implementations = [])
     {
-        $this->implementation = $implementation;
-        $this->interface = $interface;
+        $this->implementations = $implementations;
     }
 
 
@@ -56,9 +49,11 @@ final class InterfaceResolver implements ResolverInterface
      */
     public function resolve($className)
     {
-        if (!$this->canResolve($className)) return $className;
+        $trimmed = ltrim($className, '\\');
 
-        return $this->implementation;
+        if (!$this->canResolve($trimmed)) return $className;
+
+        return $this->implementations[$trimmed];
     }
 
     /**
@@ -67,7 +62,7 @@ final class InterfaceResolver implements ResolverInterface
      */
     public function canResolve($className)
     {
-        return $className === $this->interface;
+        return isset($this->implementations[$className]);
     }
 
     /**
