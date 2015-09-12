@@ -21,17 +21,17 @@
 
 namespace Bonefish\Injection\Resolver;
 
-use Bonefish\Reflection\ClassNameResolver as ReflectionResolver;
+use Bonefish\Reflection\ClassNameResolverInterface;
 
 final class ClassNameResolver extends AbstractResolver implements ResolverInterface
 {
 
     /**
-     * @var ReflectionResolver
+     * @var ClassNameResolverInterface
      */
     protected $classNameResolver;
 
-    public function __construct(ReflectionResolver $classNameResolver)
+    public function __construct(ClassNameResolverInterface $classNameResolver)
     {
         $this->classNameResolver = $classNameResolver;
     }

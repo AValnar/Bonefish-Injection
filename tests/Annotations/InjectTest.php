@@ -16,19 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author     Alexander Schmidt <mail@story75.com>
  * @copyright  Copyright (c) 2015, Alexander Schmidt
- * @date       14.05.2015
+ * @date       10.06.2015
  */
 
-namespace Bonefish\Injection;
+namespace Bonefish\Tests\Injection\Annotations;
 
+use Bonefish\Injection\Annotations\Inject;
 
-interface FactoryInterface
+class InjectTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * Return an object with fully injected dependencies
-     *
-     * @param array $parameters
-     * @return mixed
+     * @var Inject
      */
-    public function create(array $parameters = []);
+    public $sut;
+
+    public function setUp()
+    {
+        $this->sut = new Inject(['foo', true]);
+    }
+
+    public function testGetParameters()
+    {
+        $this->assertThat($this->sut->getParameters(), $this->equalTo(['foo', true]));
+    }
+
+
 }

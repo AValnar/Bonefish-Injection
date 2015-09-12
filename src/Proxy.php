@@ -79,11 +79,4 @@ final class Proxy
 
         return call_user_func_array([$this->parent->{$this->property}, $name], $arguments);
     }
-
-
-    public function __sleep()
-    {
-        // Break the proxy, because objects with proxies in them should most likely not be serialised anyway
-        return ['className'];
-    }
 }

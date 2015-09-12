@@ -16,12 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author     Alexander Schmidt <mail@story75.com>
  * @copyright  Copyright (c) 2015, Alexander Schmidt
- * @date       14.05.2015
+ * @date       18.08.2015
  */
 
-namespace Bonefish\Injection\Exceptions;
+namespace Bonefish\Tests\Injection\Resolver;
 
-class InvalidArgumentException extends \InvalidArgumentException
+
+use Bonefish\Injection\Resolver\AbstractResolver;
+use Bonefish\Injection\Resolver\ResolverInterface;
+
+class AbstractResolverTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var ResolverInterface|AbstractResolver
+     */
+    public $sut;
+
+    public function setUp()
+    {
+        $this->sut = $this->getMockForAbstractClass(AbstractResolver::class);
+    }
+
+    public function testStopPropagation()
+    {
+        $this->assertThat($this->sut->stopPropagation(), $this->isFalse());
+    }
+
 
 }

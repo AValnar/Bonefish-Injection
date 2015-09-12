@@ -24,20 +24,28 @@ namespace Bonefish\Injection\Resolver;
 
 final class FactoryResolver extends AbstractResolver implements ResolverInterface
 {
-    /**
-     * @var string
-     */
-    private $factorySuffix = 'Factory';
 
-    /**
-     * @var string
-     */
-    private $factoryNamespace = 'Factory';
+    const FACTORY_SUFFIX = 'Factory';
+    const FACTORY_NAMESPACE = 'Factory';
 
     /**
      * @var array
      */
     private $hasFactory = [];
+
+    /**
+     * @param string $className
+     * @return string
+     */
+    private function getFactoryName($className)
+    {
+        $parts = explode('\\', $className);
+        $class = array_pop($parts);
+
+        $factoryName = $class . self::FACTORY_SUFFIX;
+
+        return implode('\\', $parts) . '\\' . self::FACTORY_NAMESPACE . '\\' . $factoryName;
+    }
 
     /**
      * Resolve a given class name.
@@ -51,20 +59,7 @@ final class FactoryResolver extends AbstractResolver implements ResolverInterfac
             return $className;
         }
 
-        $parts = explode('\\', $className);
-        $class = array_pop($parts);
-
-        $factoryName = $class . $this->factorySuffix;
-
-        $resolvedClass = implode('\\', $parts) . '\\' . $this->factoryNamespace . '\\' . $factoryName;
-
-        $this->hasFactory[$className] = class_exists($resolvedClass);
-
-        if ($this->hasFactory[$className]) {
-            return $resolvedClass;
-        }
-
-        return $className;
+        return $this->getFactoryName($className);
     }
 
     /**
@@ -73,10 +68,11 @@ final class FactoryResolver extends AbstractResolver implements ResolverInterfac
      */
     public function canResolve($className)
     {
-        if (isset($this->hasFactory[$className])) {
-            return $this->hasFactory[$className];
+        if (!isset($this->hasFactory[$className])) {
+            $factoryName = $this->getFactoryName($className);
+            $this->hasFactory[$className] = class_exists($factoryName);
         }
 
-        return true;
+        return $this->hasFactory[$className];
     }
 }

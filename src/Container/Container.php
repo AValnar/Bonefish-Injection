@@ -38,12 +38,12 @@ class Container implements ContainerInterface
     protected $reflectionService;
 
     /**
-     * @var array
+     * @var array[]
      */
     protected $services = [];
 
     /**
-     * @var array
+     * @var ResolverInterface[][]
      */
     protected $prioritizedResolvers = [];
 
@@ -138,7 +138,7 @@ class Container implements ContainerInterface
      *
      * @param ResolverInterface $resolver
      * @param int $priority                 Higher priority means it will be used before one
-     *                                      with lower priority.
+     *                                      with a lower priority.
      */
     public function addResolver(ResolverInterface $resolver, $priority = 0)
     {
