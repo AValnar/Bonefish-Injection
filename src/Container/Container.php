@@ -160,7 +160,7 @@ class Container implements ContainerInterface
     {
         $className = '\\' . get_class($object);
 
-        if ($className === Container::class) {
+        if ($this->injectSelf($className)) {
             throw new InvalidArgumentException('Tried to add a container instance');
         }
 
@@ -233,7 +233,10 @@ class Container implements ContainerInterface
      */
     protected function injectSelf($className)
     {
-        return (ltrim($className, '\\') === Container::class);
+        return (
+            ltrim($className, '\\') === ContainerInterface::class ||
+            ltrim($className, '\\') === Container::class
+        );
     }
 
     /**
