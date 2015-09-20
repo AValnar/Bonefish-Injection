@@ -199,7 +199,7 @@ class Container implements ContainerInterface
 
         $constructorMethod = $classMeta->getMethod('__construct');
 
-        if ($constructorMethod === false || $constructorMethod->getAnnotation(Inject::class) === false) {
+        if ($constructorMethod === false) {
             return new $className();
         }
 
@@ -219,9 +219,14 @@ class Container implements ContainerInterface
         foreach ($parameters as $parameter)
         {
             $type = $parameter->getType();
-            if ($type === 'array' || $type === 'mixed') continue;
-
-            $dependencies[] = $this->get($type);
+            if (!$parameter->isOptional() && $type === 'array') {
+                $dependencies[] = [];
+            } elseif (!$parameter->isOptional() && $type === 'mixed') {
+                // If the type cannot be resolved and is not optional pass in null
+                $dependencies[] = null;
+            } elseif ($type !== 'mixed' && $type !== 'array') {
+                $dependencies[] = $this->get($type);
+            }
         }
 
         return $dependencies;
