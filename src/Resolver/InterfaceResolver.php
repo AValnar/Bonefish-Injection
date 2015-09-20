@@ -38,6 +38,15 @@ final class InterfaceResolver implements ResolverInterface
         $this->implementations = $implementations;
     }
 
+    /**
+     * @param string $interface
+     * @param string $implementation
+     */
+    public function addImplementation($interface, $implementation)
+    {
+        $trimmed = ltrim($interface, '\\');
+        $this->implementations[$trimmed] = $implementation;
+    }
 
     /**
      * Resolve a given class name.

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author     Alexander Schmidt <mail@story75.com>
  * @copyright  Copyright (c) 2015, Alexander Schmidt
- * @date       14.05.2015
+ * @date       20.09.2015
  */
 
 namespace Bonefish\Injection;
@@ -24,7 +24,7 @@ namespace Bonefish\Injection;
 
 use Bonefish\Injection\Container\ContainerInterface;
 
-final class Proxy
+final class LazyObject
 {
     /**
      * @var array
@@ -37,32 +37,18 @@ final class Proxy
     private $className;
 
     /**
-     * @var string
-     */
-    private $property;
-
-    /**
-     * @var object
-     */
-    private $parent;
-
-    /**
      * @var ContainerInterface
      */
     private $container;
 
     /**
      * @param string $className
-     * @param string $property
-     * @param object $parent
      * @param array $parameters
      * @param ContainerInterface $container
      */
-    public function __construct($className, $property, $parent, ContainerInterface $container, array $parameters = [])
+    public function __construct($className, ContainerInterface $container, array $parameters = [])
     {
         $this->className = $className;
-        $this->property = $property;
-        $this->parent = $parent;
         $this->container = $container;
         $this->parameters = $parameters;
     }
@@ -74,9 +60,8 @@ final class Proxy
      */
     public function __call($name, array $arguments = [])
     {
-        $dependency = $this->container->get($this->className, $this->parameters);
-        $this->parent->{$this->property} = $dependency;
+        $object = $this->container->get($this->className, $this->parameters);
 
-        return call_user_func([$this->parent->{$this->property}, $name], ...$arguments);
+        return call_user_func([$object, $name], ...$arguments);
     }
 }
