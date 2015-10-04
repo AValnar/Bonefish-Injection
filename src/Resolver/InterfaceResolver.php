@@ -71,7 +71,7 @@ final class InterfaceResolver implements ResolverInterface
      */
     public function canResolve($className)
     {
-        return isset($this->implementations[$className]);
+        return isset($this->implementations[ltrim($className, '\\')]);
     }
 
     /**
